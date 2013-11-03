@@ -20,7 +20,7 @@ class Mage_Task_BuiltIn_Gitreleases_List
         foreach(array_reverse($tags) as $tag)
         {
             $output = '';
-            $showCommand = $this->_runRemoteCommand("git show --decorate --oneline -s $tag", $output);
+                $showCommand = $this->_runRemoteCommand("git show --decorate --oneline -s $tag^{commit}", $output);
 
             //marcamos con amarillo el HEAD o current
             if(strpos($output,'HEAD') !== false)
