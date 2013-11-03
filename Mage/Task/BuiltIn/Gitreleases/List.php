@@ -16,16 +16,22 @@ class Mage_Task_BuiltIn_Gitreleases_List
         $tags = '';
         $tagCommands = $this->_runRemoteCommand('git tag ', $tags);
         $tags = ($tags == '') ? array() : explode(PHP_EOL, $tags);
+
+        $current = '';
+        $_currentAlreadyFounded = false;
+        $currentCommand = $this->_runRemoteCommand('git show -s --format=%h ', $current);
+
         //@todo ordenar tags de manera que la última sea la primera, pero teniendo en cuenta nuestro esquema de tags.
         foreach(array_reverse($tags) as $tag)
         {
             $output = '';
-                $showCommand = $this->_runRemoteCommand("git show --decorate --oneline -s $tag^{commit}", $output);
+            $showCommand = $this->_runRemoteCommand("git show --decorate --oneline -s $tag^{commit}", $output);
 
             //marcamos con amarillo el HEAD o current
-            if(strpos($output,'HEAD') !== false)
+            if(!$_currentAlreadyFounded && strpos($output,$current) === 0)
             {
                 $output = '<yellow>'.$output.'</yellow>';
+                $_currentAlreadyFounded = true;
             }
 
             Mage_Console::output($output,3);
