@@ -21,6 +21,9 @@ class Mage_Task_BuiltIn_Gitreleases_List
         $_currentAlreadyFounded = false;
         $currentCommand = $this->_runRemoteCommand('git show -s --format=%h ', $current);
 
+        $maxReleases = $this->getConfig()->release('max', 10);
+        $maxReleasesCountdown = $maxReleases;
+
         //@todo ordenar tags de manera que la última sea la primera, pero teniendo en cuenta nuestro esquema de tags.
         foreach(array_reverse($tags) as $tag)
         {
@@ -35,6 +38,13 @@ class Mage_Task_BuiltIn_Gitreleases_List
             }
 
             Mage_Console::output($output,3);
+
+            $maxReleasesCountdown--;
+            if($maxReleasesCountdown == 0){
+                $moreReleases = count($tags) - $maxReleases;
+                Mage_Console::output(sprintf("... and %d releases more (showing last %d)", $moreReleases,$maxReleases),3);
+                break;
+            }
         }
 
         Mage_Console::output('');
