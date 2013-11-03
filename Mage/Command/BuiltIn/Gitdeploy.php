@@ -1,5 +1,5 @@
 <?php
-class Mage_Command_BuiltIn_Deploygit
+class Mage_Command_BuiltIn_Gitdeploy
     extends Mage_Command_BuiltIn_Deploy
     implements Mage_Command_RequiresEnvironment
 {
