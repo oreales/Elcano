@@ -30,6 +30,15 @@ mage deploy to:production
 # Deploys Application to Production environment, overriding the current release
 mage deploy to:production --overrideRelease
 
+# Deploys Application to Production environment using git rebasing strategy (no rsync)
+# to use deploygit command is required to have git repo in production
+# and define a "remote" and "branch" to be rebased in host environment
+# check docs/example-config/.mage/environment/production.yml
+mage deploygit to:production
+
+# Deploys Application to Production environment using git rebasing strategy (no rsync)
+mage deploygit to:production
+
 # Locks deployment to Production environment
 mage lock to:production
 
