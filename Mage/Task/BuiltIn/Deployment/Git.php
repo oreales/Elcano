@@ -9,12 +9,15 @@ class Mage_Task_BuiltIn_Deployment_Git
     }
 
     /**
-     * Deployamos con git siguiendo este flujo:
      *
-     * git stash (si el repo no esta limpio en remote)
-     * git fetch origin --tags (origin definido en configuracion)
-     * git rebase origin/master (origin y branch definidos en configuracion)
-     * git stash pop (si se hizo stash en el primer paso)
+     * Deploying using git rebase strategy instead of rsync
+     *
+     * The next flow will be executed in host:
+     * git fetch remote (being remote defined in environment config)
+     * git checkout branch (being branch defined in environment config)
+     * git stash if git working copy in host is "dirty"
+     * git rebase remote/branch
+     * git stash pop if git working copy in host was "dirty"
      *
      * @return bool
      */
@@ -26,6 +29,9 @@ class Mage_Task_BuiltIn_Deployment_Git
         if (is_array($deploymentGitData) && isset($deploymentGitData['remote']) && isset($deploymentGitData['branch'])) {
             $branch = $this->getParameter('branch', $deploymentGitData['branch']);
             $remote = $this->getParameter('remote', $deploymentGitData['remote']);
+
+            //hacemos fetch
+            $commandFetch = $this->_runRemoteCommand("git fetch $remote", $output);
 
             //nos aseguramos de estar en el branch adecuado en production
             $checkoutCommand = $this->_runRemoteCommand("git checkout $branch");
@@ -52,7 +58,6 @@ class Mage_Task_BuiltIn_Deployment_Git
             }
 
             //podemos hacer el rebase
-            $commandFetch = $this->_runRemoteCommand("git fetch $remote", $output);
             $commandRebase = $this->_runRemoteCommand("git rebase $remote/$branch", $output);
             $result = $commandFetch && $commandRebase;
             Mage_Console::output("fetching & rebasing $remote/$branch... ",0,0);

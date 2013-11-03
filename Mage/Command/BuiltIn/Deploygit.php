@@ -3,6 +3,19 @@ class Mage_Command_BuiltIn_Deploygit
     extends Mage_Command_BuiltIn_Deploy
     implements Mage_Command_RequiresEnvironment
 {
+
+    /**
+     * Deploying using git rebase strategy instead of rsync
+     *
+     * The next flow will be executed in host:
+     * git fetch remote (being remote defined in environment config)
+     * git checkout branch (being branch defined in environment config)
+     * git stash if git working copy in host is "dirty"
+     * git rebase remote/branch
+     * git stash pop if git working copy in host was "dirty"
+     *
+     * @see Mage_Task_BuiltIn_Deployment_Git
+     */
     public function run()
     {
         $failedTasks = 0;
