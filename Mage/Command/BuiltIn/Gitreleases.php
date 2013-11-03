@@ -33,7 +33,7 @@ class Mage_Command_BuiltIn_Gitreleases
                         break;
 
                     case 'rollback':
-                        $releaseId = $this->getConfig()->getParameter('release', '');
+                        $releaseId = $this->getConfig()->getParameter('release', null);
                         $task = Mage_Task_Factory::get('gitreleases/rollback', $this->getConfig());
                         $task->init();
                         $task->setRelease($releaseId);
