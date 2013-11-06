@@ -60,8 +60,11 @@ class Mage_Command_BuiltIn_Gitdeploy
                 Mage_Console::output('Deploying to <dark_gray>' . $this->getConfig()->getHost() . '</dark_gray>');
 
                 $tasksToRun = $this->getConfig()->getTasks();
-                //@oreales: cambiamos el deploy por defecto a deployment/git
-                array_unshift($tasksToRun, 'deployment/git');
+                //@oreales: cambiamos el deploy por defecto a deployment/git y lo añadimos,
+                //siempre que no este ya entre las tareas, por si se quiere cambiar el orden de tareas
+                //a realizar en el deployment, por ejemplo un su antes de ejecutar el deployment/git
+                if(!in_array('deployment/git', $tasksToRun))
+                    array_unshift($tasksToRun, 'deployment/git');
 
                 if (count($tasksToRun) == 0) {
                     Mage_Console::output('<light_purple>Warning!</light_purple> <dark_gray>No </dark_gray><light_cyan>Deployment</light_cyan> <dark_gray>tasks defined.</dark_gray>', 2);
