@@ -44,7 +44,7 @@ class Factory
         } else {
             //throw new Exception('Command not found.');
             //oreales en lugar de command not found, es mejor mostrar la lista de commands permitida
-            $className = 'Mage_Command_BuiltIn_Help';
+            $className = 'Mage\\Command\\BuiltIn\\HelpCommand';
             $instance = new $className;
             $instance->setConfig($config);
         }
