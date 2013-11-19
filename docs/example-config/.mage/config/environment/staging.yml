@@ -5,12 +5,12 @@ deployment:
   to: /var/www/
   scm:
     branch: master
-  # deployment_git: required to do mage deploygit command (git rebasing deploy strategy)
-  # remote: git repo origin to be used in host to fetch from
-  # branch: git branch to be rebased / deployed in host
-  deployment_git:
-    remote: origin
-    branch: master
+# git-rebase-defaults: required to do mage deploygit command (git rebasing deploy strategy)
+# remote: git repo origin to be used in host to fetch from
+# branch: git branch to be rebased / deployed in host
+git-rebase-defaults:
+  remote: origin
+  branch: master
 releases:
   enabled: true
   max: 5
