@@ -296,7 +296,7 @@ class DeployCommand extends AbstractCommand implements RequiresEnvironment
     			$tasksToRun = $this->getConfig()->getTasks();
 
     			// Guess a Deploy Strategy
-    			switch ($this->getConfig()->deployment('strategy', 'guess')) {
+                switch ($this->getConfig()->deployment('strategy', 'guess')) {
     			    case 'disabled':
     			    	$deployStrategy = 'deployment/strategy/disabled';
     			    	break;
@@ -308,6 +308,10 @@ class DeployCommand extends AbstractCommand implements RequiresEnvironment
     			    case 'targz':
     			    	$deployStrategy = 'deployment/strategy/tar-gz';
     			    	break;
+
+                    case 'git-rebase':
+                        $deployStrategy = 'deployment/strategy/git-rebase';
+                        break;
 
     			    case 'guess':
     			    default:
