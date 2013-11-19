@@ -30,6 +30,51 @@ class ListTask extends AbstractTask implements IsReleaseAware
 
     public function run()
     {
+        $type = $this->getConfig()->getArgument(2);
+
+        switch ($type) {
+            case 'commits':
+                $this->_commits();
+                break;
+
+            case 'tags':
+            default:
+                $this->_tags();
+                break;
+        }
+    }
+
+    protected function _commits()
+    {
+        Console::output('Git Commits available on <dark_gray>' . $this->getConfig()->getHost() . '</dark_gray>',2);
+
+        // Get Commits
+        $number = $this->getParameter('n', $this->getConfig()->release('max', 10));
+        $commits = '';
+        $commitsCommand = $this->runCommandRemote('git log --decorate --oneline -s -n'.$number, $commits);
+        $commits = ($commits == '') ? array() : explode(PHP_EOL, $commits);
+
+        $current = '';
+        $_currentAlreadyFounded = false;
+        $currentCommand = $this->runCommandRemote('git show --decorate --oneline -s', $current);
+
+        foreach($commits as $commit)
+        {
+            //marcamos con amarillo el HEAD o current
+            if(!$_currentAlreadyFounded && strpos($commit,$current) === 0)
+            {
+                $commit = '<yellow>'.$commit.'</yellow>';
+                $_currentAlreadyFounded = true;
+            }
+
+            Console::output($commit,3);
+        }
+
+        Console::output('');
+    }
+
+    protected function _tags()
+    {
         Console::output('Git Releases available on <dark_gray>' . $this->getConfig()->getHost() . '</dark_gray>',2);
 
         // Get Releases
@@ -41,7 +86,7 @@ class ListTask extends AbstractTask implements IsReleaseAware
         $_currentAlreadyFounded = false;
         $currentCommand = $this->runCommandRemote('git show -s --format=%h ', $current);
 
-        $maxReleases = $this->getConfig()->release('max', 10);
+        $maxReleases = $this->getParameter('n', $this->getConfig()->release('max', 10));
         $maxReleasesCountdown = $maxReleases;
 
         //@todo ordenar tags de manera que la última sea la primera, pero teniendo en cuenta nuestro esquema de tags.
