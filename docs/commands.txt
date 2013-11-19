@@ -30,14 +30,17 @@ mage deploy to:production
 # Deploys Application to Production environment, overriding the current release
 mage deploy to:production --overrideRelease
 
-# Deploys Application to Production environment using git rebasing strategy (no rsync)
-# to use deploygit command is required to have git repo in production
-# and define a "remote" and "branch" to be rebased in host environment
-# check docs/example-config/.mage/environment/production.yml
-mage gitdeploy to:production
+# Deploys application to production with git-rebase strategy
+# using strategy: git-rebase in environment deployment config
+# git-rebase-defaults branch & remote can be defined in config also or being used as param
+# if not remote / branch defined and not passed as parameter: origin / master will be used by default
+mage deploy [--remote=remotename] [--branch=branchname] to:production
 
-# Deploys Application to Production environment using git rebasing strategy (no rsync)
-mage gitdeploy to:production
+# listing releases when git-rebase strategy is used
+# tags: list tags
+# commits: list commits
+# --n: integer to limit the number of tags / commits to list
+mage gitreleases list [tags|commits] [-n=10] to:dev
 
 # Locks deployment to Production environment
 mage lock to:production
@@ -59,7 +62,6 @@ mage releases rollback --release=-3 to:production
 
 # Rollback to a specific Release on the Production environment
 # mage releases rollback --release=20120101172148 to:production
-
 
 ### List of UPCOMING Commands ###
 # mage config add host s05.example.com to:[production]

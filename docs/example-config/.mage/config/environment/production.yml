@@ -10,6 +10,7 @@ deployment:
   to: /var/www/vhosts/example.com/www
   excludes:
     - application/data/cache/twig/*
+  strategy: git-rebase
 # git-rebase-defaults: required to do mage deploygit command (git rebasing deploy strategy)
 # remote: git repo origin to be used in host to fetch from
 # branch: git branch to be rebased / deployed in host
