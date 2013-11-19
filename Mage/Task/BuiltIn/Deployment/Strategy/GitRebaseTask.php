@@ -12,6 +12,7 @@ namespace Mage\Task\BuiltIn\Deployment\Strategy;
 
 use Mage\Task\AbstractTask;
 use Mage\Task\Releases\IsReleaseAware;
+use Mage\Console;
 
 use Exception;
 
@@ -22,56 +23,80 @@ use Exception;
  */
 class GitRebaseTask extends AbstractTask implements IsReleaseAware
 {
-	/**
-	 * (non-PHPdoc)
-	 * @see \Mage\Task\AbstractTask::getName()
-	 */
+    /**
+     * (non-PHPdoc)
+     * @see \Mage\Task\AbstractTask::getName()
+     */
     public function getName()
     {
         return 'Deploy via Git Rebase [built-in]';
     }
 
     /**
-     * Rebases the Git Working Copy as the Deployed Code
-     * @see \Mage\Task\AbstractTask::run()
+     *
+     * Deploying using git rebase strategy instead of rsync
+     *
+     * The next flow will be executed in host:
+     * git fetch remote (being remote defined in environment config)
+     * git checkout branch (being branch defined in environment config)
+     * git stash if git working copy in host is "dirty"
+     * git rebase remote/branch
+     * git stash pop if git working copy in host was "dirty"
+     *
+     * @return bool
      */
     public function run()
     {
-    	$branch = $this->getParameter('branch');
-    	$remote = $this->getParameter('remote');
+        //config from params, and if not params from environment config: git-rebase-defaults
+        $deploymentGitData = $this->getConfig()->environmentConfig('git-rebase-defaults', array());
+        $remote = $this->getParameter('remote', (array_key_exists('remote',$deploymentGitData)) ? $deploymentGitData['remote'] : 'origin');
+        $branch = $this->getParameter('branch', (array_key_exists('branch',$deploymentGitData)) ? $deploymentGitData['branch'] : 'master');
+        
+        $result = true;
 
-    	// Fetch Remote
-        $command = 'git fetch ' . $remote;
-        $result = $this->runCommandRemote($command) && $result;
+        //fetching
+        $result = $this->runCommandRemote("git fetch $remote", $output) && $result;
+        if(!$result)
+        {
+            Console::output("<red>fails fetch $remote ... </red>",0,0);
+            return false;
+        }
 
-        // Checkout
-        $command = 'git checkout ' . $branch;
-        $result = $this->runCommandRemote($command) && $result;
+        //ensuring right branch is checked out
+        $result = $this->runCommandRemote("git checkout $branch") && $result;
+        if(!$result)
+        {
+            Console::output("<red>fails $branch checkout ... </red>",0,0);
+            return false;
+        }
 
-        // Check Working Copy status
-        $stashed = false;
+        //testing for local modifications just to be sure
         $status = '';
-        $command = 'git checkout ' . $branch;
-        $result = $this->runCommandRemote($command) && $result;
-
-        // Stash if Working Copy is not clean
-        if(!$status) {
-        	$stashResult = '';
-        	$command = 'git stash';
-        	$result = $this->runCommandRemote($command, $stashResult) && $result;
-        	if($stashResult != "No local changes to save") {
+        $result = $this->runCommandRemote('git status --porcelain', $status) && $result;
+        $clean = (empty($status)) ? true : false;
+        $stashed = false;
+        if(!$clean)
+        {
+            //hacemos un stash
+            $result = $this->runCommandRemote("git stash", $output) && $result;
+            if($output != "No local changes to save"){
+                Console::output("stash ... ",0,0);
                 $stashed = true;
             }
         }
 
-        // Rebase
-        $command = 'git rebase ' . $remote . '/' . $branch;
-        $result = $this->runCommandRemote($command) && $result;
+        //rebasing
+        $result = $this->runCommandRemote("git rebase $remote/$branch", $output) && $result;
+        if(!$result)
+        {
+            Console::output("<red>fails rebase $remote/$branch ... </red>",0,0);
+        }
 
-        // If Stashed, restore.
-        if ($stashed) {
-        	$command = 'git stash pop';
-        	$result = $this->runCommandRemote($command) && $result;
+        if($stashed)
+        {
+            //local modifications before rebase being popped from stash
+            $result = $this->runCommandRemote("git stash pop", $output) && $result;
+            Console::output("stash pop ... ",0,0);
         }
 
         return $result;
