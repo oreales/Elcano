@@ -79,7 +79,7 @@ class ListTask extends AbstractTask implements IsReleaseAware
 
         // Get Releases
         $tags = '';
-        $tagCommands = $this->runCommandRemote('git tag ', $tags);
+        $tagCommands = $this->runCommandRemote('git tag -l | sort -Vr ', $tags);
         $tags = ($tags == '') ? array() : explode(PHP_EOL, $tags);
 
         $current = '';
@@ -89,8 +89,7 @@ class ListTask extends AbstractTask implements IsReleaseAware
         $maxReleases = $this->getParameter('n', $this->getConfig()->release('max', 10));
         $maxReleasesCountdown = $maxReleases;
 
-        //@todo ordenar tags de manera que la última sea la primera, pero teniendo en cuenta nuestro esquema de tags.
-        foreach(array_reverse($tags) as $tag)
+        foreach($tags as $tag)
         {
             $output = '';
             $showCommand = $this->runCommandRemote("git show --decorate --oneline -s $tag^{commit}", $output);
