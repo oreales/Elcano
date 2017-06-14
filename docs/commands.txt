@@ -42,6 +42,9 @@ mage deploy [--remote=remotename] [--branch=branchname] to:production
 # --n: integer to limit the number of tags / commits to list
 mage gitreleases list [tags|commits] [-n=10] to:dev
 
+#volviendo a una versión anterior de git
+mage gitreleases rollback --release=(commit sha OR tag) to:production
+
 # Locks deployment to Production environment
 mage lock to:production
 
